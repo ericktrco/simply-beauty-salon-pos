@@ -687,7 +687,7 @@ watch(
           branchSelect(res.data.branch_id)
           employeeSelect(res.data.employee_id)
           getUserPackages(res.data.user_id)
-          console.log(res.data);
+          console.log(res.data)
         }
       })
     } else {
@@ -1121,12 +1121,8 @@ const payment_data = ref(null)
 const stripe_payment_data = ref(null)
 const store = useBookingStore()
 const SINLGE_STEP = computed(() => store.singleStep)
-var SUB_TOTAL_SERVICE_AMOUNT = computed(() =>
-  selectedService.value.reduce((total, service) => total + service.service_price, 0) +
-  selectPurchasePackages.value.reduce((total, PurchasePackage) => total + PurchasePackage.package_price, 0) +
-  selectedProduct.value.reduce((total, product) => total + (product.discounted_price ? product.discounted_price : product.product_price) * product.product_qty, 0) +
-  selectedPackage.value.reduce((total, packages) => total + packages.package_price, 0) -
-  (couponRedeem.value || 0) // Subtract coupon discount if it exists
+var SUB_TOTAL_SERVICE_AMOUNT = computed(
+  () => selectedService.value.reduce((total, service) => total + service.service_price, 0) + selectPurchasePackages.value.reduce((total, PurchasePackage) => total + PurchasePackage.package_price, 0) + selectedProduct.value.reduce((total, product) => total + (product.discounted_price ? product.discounted_price : product.product_price) * product.product_qty, 0) + selectedPackage.value.reduce((total, packages) => total + packages.package_price, 0) - (couponRedeem.value || 0) // Subtract coupon discount if it exists
 )
 const formSubmit = handleSubmit((values) => {
   if (!IS_SUBMITED.value) {

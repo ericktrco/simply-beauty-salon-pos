@@ -55,6 +55,8 @@ Route::group(['prefix' => 'app', 'as' => 'backend.', 'middleware' => ['auth']], 
         Route::get('payment_success/{booking_transaction_id}', [BookingsController::class, 'payment_success'])->name('payment_success');
         Route::get('export', [BookingsController::class, 'export'])->name('export');
     });
+    // POS per-branch (separate from QuickBooking)
+    Route::get('pos/{branch}', [\Modules\Booking\Http\Controllers\Backend\PosController::class, 'index'])->name('pos.branch');
     Route::get('booking-invoice', [BookingsController::class, 'viewInvoice'])->name('bookings.invoice');
     Route::get('booking-invoice-download', [BookingsController::class, 'downloadInvoice'])->name('bookings.downloadinvoice');
     Route::get('bookings-table-view', [BookingsController::class, 'datatable_view'])->name('bookings.datatable_view');

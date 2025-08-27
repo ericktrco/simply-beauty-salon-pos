@@ -14,3 +14,4 @@ use Modules\QuickBooking\Http\Controllers\Backend\QuickBookingsController;
 |
 */
 Route::get('quick-booking', [QuickBookingsController::class, 'index'])->where('vue_capture', '^(?!storage).*$')->name('app.quick-booking');
+

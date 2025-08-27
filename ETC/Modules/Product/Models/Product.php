@@ -3,6 +3,7 @@
 namespace Modules\Product\Models;
 
 use App\Models\BaseModel;
+use App\Models\Branch;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Tag\Models\Tag;
@@ -119,6 +120,25 @@ class Product extends BaseModel
     public function tags_data()
     {
         return $this->belongsToMany(Tag::class, 'product_tags', 'product_id', 'tag_id');
+    }
+
+    public function branches()
+    {
+        return $this->belongsToMany(Branch::class, 'product_branches', 'product_id', 'branch_id')
+                    ->withPivot('stock_qty', 'is_available')
+                    ->withTimestamps();
+    }
+
+    public function productBranches()
+    {
+        return $this->hasMany(ProductBranch::class);
+    }
+
+    public function scopeByBranch($query, $branchId)
+    {
+        return $query->whereHas('branches', function ($q) use ($branchId) {
+            $q->where('branch_id', $branchId)->where('is_available', true);
+        });
     }
 
     protected function getFeatureImageAttribute()
