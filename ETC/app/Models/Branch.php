@@ -124,6 +124,18 @@ class Branch extends BaseModel
         return $this->hasMany(Booking::class);
     }
 
+    public function products()
+    {
+        return $this->belongsToMany(\Modules\Product\Models\Product::class, 'product_branches', 'branch_id', 'product_id')
+                    ->withPivot('stock_qty', 'is_available')
+                    ->withTimestamps();
+    }
+
+    public function productBranches()
+    {
+        return $this->hasMany(\Modules\Product\Models\ProductBranch::class);
+    }
+
     public function scopeActive($query)
     {
         return $query->where('status', 1);

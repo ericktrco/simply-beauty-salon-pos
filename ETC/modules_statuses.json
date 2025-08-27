@@ -29,5 +29,6 @@
     "ServicePackage": true,
     "Promotion": true,
     "Package": true,
-    "Installer": true
+    "Installer": true,
+    "Billing": true
 }

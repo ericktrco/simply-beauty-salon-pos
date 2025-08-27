@@ -8,7 +8,7 @@ return [
     'lbl_sales_commission' => 'Sales Commissions',
     'lbl_new_customer' => 'New Customers',
     'lbl_product_sales' => 'Product Sales',
-    'lbl_orders' => 'Ordres',
+    'lbl_orders' => 'Orders',
     'lbl_upcoming_appointment' => 'Upcoming Appointments',
     'lbl_upcoming_bookings' => 'No Upcoming Bookings',
     'lbl_appointment_revenue' => 'Appointments / Revenue',

@@ -17,10 +17,10 @@
       <div data-render="app">
         <calendar-view
           slot-duration="{{ setting('slot_duration') }}"
-          status="{{ json_encode($statusList) }}"
+          :status='@json($statusList)'
           :branch-id="{{ $selected_branch->id ?? 1 }}"
-          date={{$date}}
-          ></calendar-view>
+          :date="new Date('{{ $date }}')"
+        ></calendar-view>
       </div>
     </div>
 </div>

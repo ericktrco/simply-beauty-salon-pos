@@ -33,9 +33,6 @@ Route::get('storage-link', function () {
     return Artisan::call('storage:link');
 });
 
-Route::group(['middleware' => ['auth']], function () {
-
-});
 Route::get('/', function () {
     if (auth()->user()->hasRole('employee')) {
         return redirect(RouteServiceProvider::EMPLOYEE_LOGIN_REDIRECT);

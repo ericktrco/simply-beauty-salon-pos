@@ -36,7 +36,6 @@ import TabPanel from './TabPanel.vue'
 
 // Setup Array
 const setupArray = reactive([
-
   {
     id: 1,
     title: 'quick_booking.lbl_select_branch',
@@ -106,7 +105,7 @@ const setupArray = reactive([
     done: false,
     next: null,
     prev: null
-  },
+  }
 ])
 const currentindex = ref(1)
 const activeCheck = (value) => (currentindex.value == value ? 'active' : '')

@@ -1,38 +1,35 @@
 <template>
-            <div class="pagination-controls">
-              <nav aria-label="Pagination">
-                <ul class="pagination justify-content-end">
-                  <!-- Previous Button -->
-                  <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                    <button @click="prevPage" class="page-link" :disabled="currentPage === 1">Previous</button>
-                  </li>
-                  <!-- Page Number Before Current -->
-                  <li v-if="currentPage > 1" class="page-item">
-                    <button @click="goToPage(currentPage - 1)" class="page-link">{{ currentPage - 1 }}</button>
-                  </li>
-                  <!-- Current Page -->
-                  <li class="page-item active" aria-current="page">
-                    <span class="page-link">{{ currentPage }}</span>
-                  </li>
-                  <!-- Page Number After Current -->
-                  <li v-if="currentPage < totalPages" class="page-item">
-                    <button @click="goToPage(currentPage + 1)" class="page-link">{{ currentPage + 1 }}</button>
-                  </li>
-                  <!-- Next Button -->
-                  <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-                    <button @click="nextPage" class="page-link" :disabled="currentPage === totalPages">Next</button>
-                  </li>
-                </ul>
-              </nav>
-            </div>
+  <div class="pagination-controls">
+    <nav aria-label="Pagination">
+      <ul class="pagination justify-content-end">
+        <!-- Previous Button -->
+        <li class="page-item" :class="{ disabled: currentPage === 1 }">
+          <button @click="prevPage" class="page-link" :disabled="currentPage === 1">Previous</button>
+        </li>
+        <!-- Page Number Before Current -->
+        <li v-if="currentPage > 1" class="page-item">
+          <button @click="goToPage(currentPage - 1)" class="page-link">{{ currentPage - 1 }}</button>
+        </li>
+        <!-- Current Page -->
+        <li class="page-item active" aria-current="page">
+          <span class="page-link">{{ currentPage }}</span>
+        </li>
+        <!-- Page Number After Current -->
+        <li v-if="currentPage < totalPages" class="page-item">
+          <button @click="goToPage(currentPage + 1)" class="page-link">{{ currentPage + 1 }}</button>
+        </li>
+        <!-- Next Button -->
+        <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+          <button @click="nextPage" class="page-link" :disabled="currentPage === totalPages">Next</button>
+        </li>
+      </ul>
+    </nav>
+  </div>
   <div ref="calenderRef"></div>
-  <booking-form :booking-type="bookingType"
-                :status-list="bookingStatus"
-                @onSubmit="onSubmitEvent"
-                :booking-data="bookingData"></booking-form>
+  <booking-form :booking-type="bookingType" :status-list="bookingStatus" @onSubmit="onSubmitEvent" :booking-data="bookingData"></booking-form>
 </template>
 <script setup>
-import { reactive, ref, onMounted, onUnmounted, watch, nextTick, computed } from 'vue'
+import { reactive, ref, computed, onMounted, onUnmounted } from 'vue'
 import { createRequest } from '@/helpers/utilities'
 
 import Calendar from '@event-calendar/core'
@@ -42,25 +39,29 @@ import TimeGrid from '@event-calendar/time-grid'
 import ResourceTimeGrid from '@event-calendar/resource-time-grid'
 import Interaction from '@event-calendar/interaction'
 
-const currentPage = ref(1);
-const perPage = ref(6);
 import BookingForm from './BookingForm.vue'
 import { INDEX_URL } from '../constant/booking'
-import * as moment from 'moment'
+// import * as moment from 'moment'
+
+const currentPage = ref(1)
+const perPage = ref(6)
 const totalEmployees = ref(0)
-const props = defineProps({
-  status: { type: String, required: true },
-  slotDuration: { type: String },
-  branchId: {type: [String , Number]},
-  date: new Date()
+const totalPages = computed(() => {
+  const pages = Math.ceil(totalEmployees.value / perPage.value)
+  return pages > 0 ? pages : 1
 })
-let slotsDurations = '00:15'
-if(props.slotDuration !== '') {
-  slotsDurations = props.slotDuration
-}
-const bookingStatus = ref(JSON.parse(props.status))
-const calenderRef = ref('')
-const calenderInit = ref('')
+
+const props = defineProps({
+  status: { type: [String, Object], required: true },
+  slotDuration: { type: String },
+  branchId: { type: [String, Number] },
+  date: { type: Date, default: () => new Date() }
+})
+
+const slotsDurations = props.slotDuration || '00:15'
+const bookingStatus = ref(typeof props.status === 'string' ? JSON.parse(props.status) : props.status)
+const calenderRef = ref(null)
+const calenderInit = ref(null)
 const bookingType = ref('')
 const bookingData = reactive({
   id: 0,
@@ -69,9 +70,10 @@ const bookingData = reactive({
   branch_id: props.branchId
 })
 
+// --- Booking Form ---
 const setBooking = (info) => {
   bookingData.id = info.id || 0
-  bookingData.employee_id = info?.resource?.id || null
+  bookingData.employee_id = info?.resource?.id || info?.resourceIds?.[0] || null
   bookingData.start_date_time = info.date || null
 }
 
@@ -82,163 +84,150 @@ const showBookingForm = (info) => {
   const form = bootstrap.Offcanvas.getOrCreateInstance(elem)
   form.show()
   document.querySelector('.offcanvas-backdrop')?.remove()
-  updateBodyClass('show')
+  document.body.classList.add('calender-view')
 }
 
 const hideBookingForm = () => {
   const elem = document.getElementById('booking-form')
   const form = bootstrap.Offcanvas.getOrCreateInstance(elem)
   form.hide()
-  updateBodyClass('hide')
-}
-
-const updateBodyClass = (value = 'hide') => {
-  if(value == 'show') {
-    document.body.classList.add('calender-view')
-  } else {
-    document.body.classList.remove('calender-view')
-  }
+  document.body.classList.remove('calender-view')
 }
 
 const createBooking = () => {
   bookingType.value = 'CREATE_BOOKING'
   showBookingForm({})
 }
+
+onMounted(() => {
+  // Add event listener for drawer close
+  const elem = document.getElementById('booking-form')
+  if (elem) {
+    elem.addEventListener('hide.bs.offcanvas', () => {
+      setBooking({})
+      bookingType.value = ''
+      document.body.classList.remove('calender-view')
+    })
+  }
+})
+
 onUnmounted(() => {
   const elem = document.getElementById('booking-form')
-  if(elem !== null) {
-    updateBodyClass('hide')
-    elem.removeEventListener('hide.bs.offcanvas', function() {
+  if (elem) {
+    elem.removeEventListener('hide.bs.offcanvas', () => {
       setBooking({})
-      updateBodyClass('hide')
       bookingType.value = ''
+      document.body.classList.remove('calender-view')
     })
   }
-})
-onMounted(() => {
-  const elem = document.getElementById('booking-form')
-  if(elem !== null) {
-    elem.addEventListener('hide.bs.offcanvas', function() {
-      setBooking({})
-      updateBodyClass('hide')
-      bookingType.value = ''
-    })
-    const bkid = new URL(location.href).searchParams.get('booking_id')
-    if(bkid !== null && bkid !== undefined) {
-      bookingType.value = 'CALENDER_BOOKING'
-      showBookingForm({id: bkid})
-    }
-  }
-  nextTick(() => {
-    if (calenderRef.value) {
-      calenderInit.value = new Calendar({
-        target: calenderRef.value,
-        props: {
-          plugins: [DayGrid, List, TimeGrid, ResourceTimeGrid, Interaction],
-          options: {
-            date: props.date,
-            slotEventOverlap: false,
-            dragScroll: false,
-            view: 'resourceTimeGridDay',
-            height: '800px',
-            headerToolbar: {
-              start: 'prev,next today',
-              center: 'title',
-              end: 'resourceTimeGridDay'
-            },
-            buttonText: (texts) => {
-              texts.resourceTimeGridDay = 'Day'
-              texts.resourceTimeGridWeek = 'Week'
-              return texts
-            },
-            eventContent: (data) => {
-              if (data.event.titleHTML !== undefined) {
-                return { html: data.event.titleHTML + data.timeText }
-              }
-              return { html: data.timeText }
-            },
-            slotLabelFormat: (data) => {
-              const minute = data.getMinutes()
-              return minute === 0 ? moment(data).format('hh:mm A') : ''
-            },
-            resources: [],
-            scrollTime: '09:00:00',
-            events: [],
-            views: {
-              timeGridWeek: { pointer: true },
-              resourceTimeGridWeek: { pointer: true },
-              resourceTimeGridDay: { pointer: true }
-            },
-            eventSources: [
-              {
-                events: async () => {
-                  const params = {
-                    page: currentPage.value,
-                    per_page: perPage.value
-                  }
-                  const res = await createRequest(INDEX_URL(params))
-                  const { employees, data } = res
-                  totalEmployees.value = res.total_count
-                  calenderInit.value.setOption('resources', employees)
-                  console.log('Fetched Events:', data)
-                  return data
-                }
-              }
-            ],
-            dateClick: (info) => showBookingForm(info),
-            select: (info) => showBookingForm(info),
-            eventClick: (info) => {
-              const updatedInfo = {
-                id: info.event.id,
-                resource: { id: info.event.resourceIds[0] },
-                date: info.event.start
-              }
-              showBookingForm(updatedInfo)
-            },
-            eventStartEditable: false,
-            slotDuration: slotsDurations,
-            dayMaxEvents: true,
-            nowIndicator: true,
-            selectable: false
-          }
-        }
-      })
-    }
-  })
 })
 
-const onSubmitEvent = async () => {
-  await nextTick()
-  calenderInit.value.refetchEvents()
+// --- Fetch & Render Events ---
+const fetchAndRenderEvents = async () => {
+  const params = { page: currentPage.value, per_page: perPage.value }
+  const res = await createRequest(INDEX_URL(params))
+  const { employees, data } = res
+  totalEmployees.value = res.total_count
+
+  // Set resources
+  calenderInit.value.setOption(
+    'resources',
+    employees.map((emp) => ({ id: emp.id, title: emp.title }))
+  )
+
+  // Set events
+  calenderInit.value.setOption(
+    'events',
+    data.map((event) => ({
+      id: event.id,
+      title: event.title,
+      start: event.start,
+      end: event.end,
+      resourceIds: [event.resourceId], // Important for ResourceTimeGrid
+      backgroundColor: event.color || '#3788d8', // Use status color from backend
+      borderColor: event.color || '#3788d8'
+    }))
+  )
 }
 
+// --- Calendar Initialization ---
+onMounted(() => {
+  calenderInit.value = new Calendar({
+    target: calenderRef.value,
+    props: {
+      plugins: [DayGrid, List, TimeGrid, ResourceTimeGrid, Interaction],
+      options: {
+        date: props.date,
+        view: 'resourceTimeGridDay',
+        height: '800px',
+        slotEventOverlap: false,
+        dragScroll: false,
+        scrollTime: '09:00:00',
+        slotDuration: slotsDurations,
+        dayMaxEvents: true,
+        nowIndicator: true,
+        selectable: false,
+        headerToolbar: {
+          start: 'prev,next today',
+          center: 'title',
+          end: 'resourceTimeGridDay'
+        },
+        buttonText: (texts) => {
+          texts.resourceTimeGridDay = 'Day'
+          texts.resourceTimeGridWeek = 'Week'
+          return texts
+        },
+        eventContent: (data) => {
+          return { html: data.event.title + ' ' + data.timeText }
+        },
+        dateClick: showBookingForm,
+        select: showBookingForm,
+        eventClick: (info) => {
+          showBookingForm({
+            id: info.event.id,
+            resourceIds: info.event.resourceIds,
+            date: info.event.start
+          })
+        }
+      }
+    }
+  })
+
+  // Initial fetch
+  fetchAndRenderEvents()
+
+  // If booking_id is in URL
+  const bkid = new URL(location.href).searchParams.get('booking_id')
+  if (bkid) showBookingForm({ id: bkid })
+})
+
+// --- Pagination ---
 const prevPage = () => {
   if (currentPage.value > 1) {
     currentPage.value--
-    calenderInit.value.refetchEvents()
+    fetchAndRenderEvents()
   }
 }
-
 const nextPage = () => {
   if (currentPage.value * perPage.value < totalEmployees.value) {
     currentPage.value++
-    calenderInit.value.refetchEvents()
+    fetchAndRenderEvents()
+  }
+}
+const goToPage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page
+    fetchAndRenderEvents()
   }
 }
 
-const totalPages = computed(() => {
-  return Math.ceil(totalEmployees.value / perPage.value)
-})
-
-const goToPage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page;
-  }
-};
-
-
+// --- After Booking Submit ---
+const onSubmitEvent = () => {
+  setTimeout(() => fetchAndRenderEvents(), 500)
+}
 </script>
-<style >
+
+<style>
 @import '@event-calendar/core/index.css';
 body {
   transition: width 400ms ease;
@@ -263,30 +252,37 @@ body {
 .dark .ec-day.ec-today {
   background-color: #181818;
 }
-.ec-event{
+.ec-event {
   border-radius: 0;
   border-bottom: 2px solid var(--bs-border-color);
   cursor: pointer;
 }
-.ec-body:not(.ec-compact) .ec-line:nth-child(even):after{
+.ec-body:not(.ec-compact) .ec-line:nth-child(even):after {
   border-bottom-style: solid;
 }
 .ec-line:not(:first-child):after {
   border-color: var(--bs-border-color);
 }
-.ec-header,.ec-all-day,.ec-body,.ec-days,.ec-day{
+.ec-header,
+.ec-all-day,
+.ec-body,
+.ec-days,
+.ec-day {
   border-color: var(--bs-border-color);
 }
-.ec-button, .ec-button:not(:disabled) {
+.ec-button,
+.ec-button:not(:disabled) {
   color: var(--bs-body-color);
   background-color: var(--bs-body-bg);
   border-color: var(--bs-border-color);
 }
-.dark .ec-button:not(:disabled):hover, .dark .ec-button.ec-active {
+.dark .ec-button:not(:disabled):hover,
+.dark .ec-button.ec-active {
   border-color: var(--bs-border-color);
   background-color: var(--bs-body-bg);
 }
-.ec-icon.ec-prev:after, .ec-icon.ec-next:after {
+.ec-icon.ec-prev:after,
+.ec-icon.ec-next:after {
   border-color: var(--bs-body-color);
 }
 </style>

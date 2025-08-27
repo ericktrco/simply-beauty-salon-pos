@@ -26,7 +26,7 @@
             <div class="col-md-12 form-group editor-container">
               <label class="form-label" for="description">{{ $t('product.long_description') }}</label>
               <!-- Add Quill editor here -->
-              <QuillEditor theme="snow" v-model:content="description" contentType="html"/>
+              <QuillEditor theme="snow" v-model:content="description" contentType="html" />
               <span class="text-danger">{{ errors.description }}</span>
             </div>
 
@@ -38,7 +38,8 @@
                   <li v-for="err in errorMessages['brand_id']" :key="err">{{ err }}</li>
                 </ul>
               </span>
-              <span class="text-danger">{{ errors.brand_id }}</span>               </div>
+              <span class="text-danger">{{ errors.brand_id }}</span>
+            </div>
 
             <div class="form-group col-md-6">
               <label class="form-label" for="categories">{{ $t('product.categories') }} <span class="text-danger">*</span></label>
@@ -54,6 +55,12 @@
             <div class="col-md-6 form-group">
               <label class="form-label">{{ $t('product.unit') }}</label>
               <Multiselect id="units-list" v-model="unit_id" :value="unit_id" v-bind="singleSelectOption" :options="units.options" class="form-group"></Multiselect>
+            </div>
+
+            <div class="col-md-12 form-group">
+              <label class="form-label">{{ $t('product.branches') }} <span class="text-danger">*</span></label>
+              <Multiselect id="branches-list" v-model="branch_ids" :value="branch_ids" placeholder="Select Branches" v-bind="multiselectOption" :options="branches.options" class="form-group"></Multiselect>
+              <span class="text-danger">{{ errors['branch_ids'] }}</span>
             </div>
           </div>
         </fieldset>
@@ -73,9 +80,8 @@
                 <div class="d-flex gap-3 align-items-center">
                   <div class="d-flex flex-grow-1 gap-3">
                     <div class="form-group w-50">
-          <label for="">{{ $t('product.variation_type') }}</label>
-                      <Multiselect id="variations-list" v-model="varData.value.variation" :value="varData.value.variation" v-bind="singleSelectOption" @select="generateCombinations" @deselect="generateCombinations" :options="variationsData.options.filter((item) => item.id !== varData.value.variation)" @change="() => varData.value.variationValue = []" class="form-group"></Multiselect>
-
+                      <label for="">{{ $t('product.variation_type') }}</label>
+                      <Multiselect id="variations-list" v-model="varData.value.variation" :value="varData.value.variation" v-bind="singleSelectOption" @select="generateCombinations" @deselect="generateCombinations" :options="variationsData.options.filter((item) => item.id !== varData.value.variation)" @change="() => (varData.value.variationValue = [])" class="form-group"></Multiselect>
                     </div>
                     <div class="form-group w-50">
                       <label for="">{{ $t('product.variation_value') }}</label>
@@ -83,9 +89,7 @@
                     </div>
                   </div>
                   <div v-if="variations.length > 1">
-                    <button
-                      class="btn btn-danger btn-icon"
-                      @click="variationsSplice(index);generateCombinations()">
+                    <button class="btn btn-danger btn-icon" @click="handleRemove(index)">
                       <i class="fa-solid fa-trash"></i>
                     </button>
                   </div>
@@ -123,7 +127,7 @@
             </div>
           </div>
           <div class="row" v-else>
-            <InputField class="col-md-3" type="number"  :is-required="true" :error-messages="errorMessages['price']" :step="0.01" :min="0.01" :label="$t('product.price_tax')" placeholder="" v-model="price" :error-message="errors['price']"></InputField>
+            <InputField class="col-md-3" type="number" :is-required="true" :error-messages="errorMessages['price']" :step="0.01" :min="0.01" :label="$t('product.price_tax')" placeholder="" v-model="price" :error-message="errors['price']"></InputField>
             <InputField class="col-md-3" type="number" :is-required="true" :error-messages="errorMessages['stock']" :step="0" :min="1" :label="$t('product.stock')" placeholder="" v-model="stock" :error-message="errors['stock']"></InputField>
             <InputField class="col-md-3" type="text" :label="$t('product.sku')" placeholder="" v-model="sku" :error-message="errors['sku']"></InputField>
             <InputField class="col-md-3" type="text" :label="$t('product.code')" placeholder="" v-model="code" :error-message="errors['code']"></InputField>
@@ -166,7 +170,7 @@
           </div>
         </div>
       </div>
-    <FormFooter :IS_SUBMITED="IS_SUBMITED"></FormFooter>
+      <FormFooter :IS_SUBMITED="IS_SUBMITED"></FormFooter>
     </div>
   </form>
 </template>
@@ -175,9 +179,12 @@
 import { ref, onMounted } from 'vue'
 import { EDIT_URL, STORE_URL, UPDATE_URL } from '../constant/product'
 import { CATEGORY_LIST, BRAND_LIST, UNITS_LIST, TAGS_LIST, VARIATIONS_LIST } from '../constant/product'
+import { BRANCH_LIST } from '@/vue/constants/branch'
 import { useField, useForm, useFieldArray } from 'vee-validate'
 import InputField from '@/vue/components/form-elements/InputField.vue'
 import FlatPickr from 'vue-flatpickr-component'
+import { QuillEditor } from '@vueup/vue-quill'
+import '@vueup/vue-quill/dist/vue-quill.snow.css'
 import { useModuleId, useRequest, useOnOffcanvasHide } from '@/helpers/hooks/useCrudOpration'
 import * as yup from 'yup'
 import { readFile } from '@/helpers/utilities'
@@ -188,8 +195,8 @@ import { buildMultiSelectObject } from '@/helpers/utilities'
 
 // ... (rest of the setup code) ...
 
-const descriptionEditorRef = ref(null);
-const validationMessage = ref('');
+const descriptionEditorRef = ref(null)
+const validationMessage = ref('')
 
 // props
 const props = defineProps({
@@ -207,12 +214,13 @@ const config = ref({
   mode: 'range'
 })
 
+const handleRemove = (index) => {
+  variationsSplice(index)
+  generateCombinations()
+}
+
 // Edit Form Or Create Form
 const currentId = useModuleId(() => {
-  if(data.value.brand_id) {
-      brand_id.value = data.value.brand_id
-      selectBrand(brand_id.value)
-    }
   if (currentId.value > 0) {
     getRequest({ url: EDIT_URL, id: currentId.value }).then((res) => {
       if (res.status) {
@@ -235,29 +243,29 @@ const ImageViewer = ref(null)
 // const editimg = ref(null);
 const profileInputRef = ref(null)
 const fileUpload = async (e) => {
-  let file = e.target.files[0];
-  const maxSizeInMB = 2;
-  const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
+  let file = e.target.files[0]
+  const maxSizeInMB = 2
+  const maxSizeInBytes = maxSizeInMB * 1024 * 1024
 
   if (file) {
     if (file.size > maxSizeInBytes) {
       // File is too large
-      validationMessage.value = `File size exceeds ${maxSizeInMB} MB. Please upload a smaller file.`;
+      validationMessage.value = `File size exceeds ${maxSizeInMB} MB. Please upload a smaller file.`
       // Clear the file input
-      profileInputRef.value.value = '';
-      return;
+      profileInputRef.value.value = ''
+      return
     }
 
     await readFile(file, (fileB64) => {
-      ImageViewer.value = fileB64;
-      profileInputRef.value.value = '';
-      validationMessage.value = ''; 
-    });
-    feature_image.value = file;
+      ImageViewer.value = fileB64
+      profileInputRef.value.value = ''
+      validationMessage.value = ''
+    })
+    feature_image.value = file
   } else {
-    validationMessage.value = '';
+    validationMessage.value = ''
   }
-};
+}
 
 // Function to delete Images
 const removeImage = ({ imageViewerBS64, changeFile }) => {
@@ -284,6 +292,7 @@ const defaultData = () => {
     tags: [],
     brand_id: '',
     unit_id: '',
+    branch_ids: [],
     price: '',
     stock: '',
     sku: '',
@@ -312,6 +321,7 @@ const setFormData = (data) => {
       tags: data.tags || [],
       brand_id: data.brand_id || null,
       unit_id: data.unit_id || null,
+      branch_ids: data.branch_ids || [],
       price: data.price || null,
       stock: data.stock || null,
       sku: data.sku || null,
@@ -324,7 +334,7 @@ const setFormData = (data) => {
       has_variation: data.has_variation || 0,
       feature_image: data.feature_image,
       status: data.status || 1,
-      is_featured: data.is_featured || 0,
+      is_featured: data.is_featured || 0
     }
   })
 }
@@ -357,17 +367,15 @@ const validationSchema = yup.object({
     }
     return true
   }),
-  brand_id: yup.string()
-    .required('Select Brand is a required field'),
-  price: yup.number()
-    .required('Price is a required field')
-    .typeError('Price must be a valid number')
-    .min(0.01, 'Price must be greater than 0'),
-  stock: yup.number()
-    .required('Stock is a required field')
-    .typeError('Stock must be a valid number')
-    .integer('Stock must be an integer')
-    .min(1, 'Stock must be at least 1'),
+  branch_ids: yup.array().test('branch_ids', 'Branches is a required field', function (value) {
+    if (value.length == 0) {
+      return false
+    }
+    return true
+  }),
+  brand_id: yup.string().required('Select Brand is a required field'),
+  price: yup.number().required('Price is a required field').typeError('Price must be a valid number').min(0.01, 'Price must be greater than 0'),
+  stock: yup.number().required('Stock is a required field').typeError('Stock must be a valid number').integer('Stock must be an integer').min(1, 'Stock must be at least 1')
 })
 
 const { handleSubmit, errors, resetForm } = useForm({
@@ -381,6 +389,7 @@ const { value: short_description } = useField('short_description')
 const { value: description } = useField('description')
 const { value: category_ids } = useField('category_ids')
 const { value: brand_id } = useField('brand_id')
+const { value: branch_ids } = useField('branch_ids')
 const { value: tags } = useField('tags')
 const { value: unit_id } = useField('unit_id')
 const { value: price } = useField('price')
@@ -395,7 +404,6 @@ const { fields: variations, push: variationsPush, remove: variationsSplice } = u
 const { fields: combinations, push: combinationsPush, remove: combinationsSplice, replace: combinationsReplace } = useFieldArray('combinations')
 const { value: feature_image } = useField('feature_image')
 
-
 const errorMessages = ref({})
 
 onMounted(() => {
@@ -405,8 +413,8 @@ onMounted(() => {
   getUnits()
   getTags()
   getVariations()
+  getBranches()
 })
-
 
 const brands = ref({ options: [], list: [] })
 
@@ -418,7 +426,7 @@ const selectBrand = (value) => {
 
 const category = ref({ options: [], list: [] })
 
-const getCategory = (value) => useSelect({ url: CATEGORY_LIST, data: {brand_id: value}}, { value: 'id', label: 'name' }).then((data) => (category.value = data))
+const getCategory = (value) => useSelect({ url: CATEGORY_LIST, data: { brand_id: value } }, { value: 'id', label: 'name' }).then((data) => (category.value = data))
 
 const units = ref({ options: [], list: [] })
 
@@ -432,16 +440,21 @@ const variationsData = ref({ options: [], list: [] })
 
 const getVariations = () => useSelect({ url: VARIATIONS_LIST }, { value: 'id', label: 'name' }).then((data) => (variationsData.value = data))
 
+const branches = ref({ options: [], list: [] })
+
+const getBranches = () => useSelect({ url: BRANCH_LIST }, { value: 'id', label: 'name' }).then((data) => (branches.value = data))
+
 const variationValueCheck = (data) => {
   return buildMultiSelectObject(variationsData.value.list.find((item) => item.id == data)?.values || [], { value: 'id', label: 'name' })
 }
 const IS_SUBMITED = ref(false)
 const formSubmit = handleSubmit((values) => {
-  if(IS_SUBMITED.value) return false
+  if (IS_SUBMITED.value) return false
   IS_SUBMITED.value = true
   values.combinations = JSON.stringify(values.combinations)
   values.tags = JSON.stringify(values.tags)
   values.category_ids = JSON.stringify(values.category_ids)
+  values.branch_ids = JSON.stringify(values.branch_ids)
 
   if (currentId.value > 0) {
     updateRequest({ url: UPDATE_URL, id: currentId.value, body: values, type: 'file' }).then((res) => reset_datatable_close_offcanvas(res))
@@ -540,6 +553,6 @@ const multiselectCreateOption = ref({
   }
 }
 .editor-container {
-    height: 200px;
+  height: 200px;
 }
 </style>
