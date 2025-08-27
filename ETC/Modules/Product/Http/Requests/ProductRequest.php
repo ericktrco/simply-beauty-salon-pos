@@ -17,6 +17,7 @@ class ProductRequest extends FormRequest
             'name' => ['required'],
             'category_ids' => ['required'],
             'brand_id' => ['required'],
+            'branch_ids' => ['required'],
             // 'stock' => ['numeric', 'min:1'],
             // 'price' => ['numeric', 'min:1']
         ];
