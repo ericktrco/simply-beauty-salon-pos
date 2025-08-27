@@ -11,6 +11,7 @@ use Modules\Location\Models\Location;
 use Modules\Product\Http\Requests\ProductRequest;
 use Modules\Product\Models\Brands;
 use Modules\Product\Models\Product;
+use Modules\Product\Models\ProductBranch;
 use Modules\Product\Models\ProductCategory;
 use Modules\Product\Models\ProductGallery;
 use Modules\Product\Models\ProductVariation;
@@ -303,6 +304,27 @@ class ProductsController extends Controller
             ->make(true);
     }
 
+    public function products_list(Request $request)
+    {
+        $query = Product::where('status', 1)->with('productBranches');
+        
+        // Get branch ID from request parameter or session
+        $branchId = $request->branch_id ?? $request->selected_session_branch_id ?? null;
+        
+        if ($branchId) {
+            $query->whereHas('productBranches', function($q) use ($branchId) {
+                $q->where('branch_id', $branchId)->where('is_available', 1);
+            });
+        }
+        
+        $products = $query->get();
+
+        return response()->json([
+            'data' => $products,
+            'status' => true,
+        ]);
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -367,6 +389,18 @@ class ProductsController extends Controller
 
         $product->is_featured = $request->is_featured;
         $product->save();
+
+        if (!empty($request->branch_ids)) {
+            $branch_ids = is_string($request->branch_ids) ? json_decode($request->branch_ids, true) : $request->branch_ids;
+            foreach ($branch_ids as $branchId) {
+                ProductBranch::create([
+                    'product_id' => $product->id,
+                    'branch_id' => $branchId,
+                    'stock_qty' => $request->stock,
+                    'is_available' => 1,
+                ]);
+            }
+        }
 
         // tags
         $tag_ids = [];

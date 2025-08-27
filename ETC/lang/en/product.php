@@ -34,7 +34,7 @@ return [
     'quantity' => 'Quantity',
     'percent' => 'Percent ',
     'add_stock' => 'Add Stock',
-    'stock' => 'Stock',
+    'branches' => 'Branches',
     'small' => 'Small',
     'medium' => 'Medium',
     'large' => 'Large',

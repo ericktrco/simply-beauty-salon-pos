@@ -434,7 +434,7 @@ function initProductsDataTable() {
   productsDataTable = $('#products-datatable').DataTable({
     serverSide: false,
     ajax: {
-      url: '/app/products/index_data',
+      url: '/app/products/products_list',
       type: 'GET',
       data: function (d) {
         return {

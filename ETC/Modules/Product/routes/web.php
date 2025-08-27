@@ -92,6 +92,7 @@ Route::group(['prefix' => 'app', 'as' => 'backend.', 'middleware' => ['auth']], 
         Route::post('update-is-featured/{id}', [ProductsController::class, 'update_is_featured'])->name('update_is_featured');
         Route::get('gallery-images/{id}', [ProductsController::class, 'getGalleryImages']);
         Route::post('gallery-images/{id}', [ProductsController::class, 'uploadGalleryImages']);
+        Route::get('products_list', [ProductsController::class, 'products_list'])->name('products_list');
     });
     Route::resource('products', ProductsController::class);
 
