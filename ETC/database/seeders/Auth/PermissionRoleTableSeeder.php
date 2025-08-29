@@ -71,6 +71,21 @@ class PermissionRoleTableSeeder extends Seeder
             'add_commission',
             'edit_commission',
             'delete_commission',
+            'view_billing',
+            'view_earning',
+            'view_tax',
+        ]);
+
+        $employee->givePermissionTo([
+            'view_dashboard',
+            'view_booking',
+            'booking_booking_tableview',
+            'view_service',
+            'view_categories',
+            'view_subcategories',
+            'view_billing',
+            'view_earning',
+            'view_tax',
         ]);
 
         Schema::enableForeignKeyConstraints();

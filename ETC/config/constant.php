@@ -115,5 +115,9 @@ return [
             'module_name' => 'Product Orders',
             'is_custom_permission' => 0,
         ],
+        [
+            'module_name' => 'Billing',
+            'is_custom_permission' => 0,
+        ],
     ],
 ];

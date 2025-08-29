@@ -27,7 +27,7 @@ return [
         [
             'title' => 'sidebar.main',
             'menu_item_type' => 'static',
-            'permission' => ['view_dashboard', 'view_booking'],
+            'permission' => ['view_dashboard', 'view_booking', 'view_billing'],
             'order' => 0,
         ],
         [
@@ -151,7 +151,7 @@ return [
         [
             'title' => 'sidebar.finance',
             'menu_item_type' => 'static',
-            'permission' => ['view_tax', 'view_earning'],
+            'permission' => ['view_tax', 'view_earning', 'view_billing'],
             'order' => 13,
         ],
         [
@@ -163,12 +163,20 @@ return [
             'order' => 14,
         ],
         [
+            'start_icon' => 'fa-solid fa-file-invoice',
+            'title' => 'sidebar.billing',
+            'route' => 'backend.billing.index',
+            'active' => ['app/billing'],
+            'permission' => ['view_billing'],
+            'order' => 15,
+        ],
+        [
             'start_icon' => 'fa-solid fa-money-bill-1-wave',
             'title' => 'sidebar.staff_earnings',
             'route' => 'backend.earnings.index',
             'active' => ['app/earnings'],
             'permission' => ['view_earning'],
-            'order' => 15,
+            'order' => 16,
         ],
         [
             'start_icon' => 'fa-solid fa-ticket',
@@ -176,14 +184,14 @@ return [
             'route' => 'backend.promotions.index',
             'active' => ['app/promotions'],
             'permission' => ['view_role_permissions'],
-            'order' => 16,
+            'order' => 17,
             'menu_level' => 1,
         ],
         [
             'title' => 'sidebar.reports',
             'menu_item_type' => 'static',
             'permission' => ['daily_booking_report', 'overall_booking_report', 'payout_report', 'employee_report'],
-            'order' => 17,
+            'order' => 18,
         ],
         [
             'start_icon' => 'fa-solid fa-file-invoice-dollar',
@@ -191,7 +199,7 @@ return [
             'route' => 'backend.reports.daily-booking-report',
             'active' => ['app/daily-booking-report'],
             'permission' => ['daily_booking_report'],
-            'order' => 18,
+            'order' => 19,
         ],
         [
             'start_icon' => 'fa-solid fa-chart-line',
@@ -199,7 +207,7 @@ return [
             'route' => 'backend.reports.overall-booking-report',
             'active' => ['app/overall-booking-report'],
             'permission' => ['overall_booking_report'],
-            'order' => 19,
+            'order' => 20,
         ],
         [
             'start_icon' => 'fa-solid fa-chart-bar',
@@ -207,7 +215,7 @@ return [
             'route' => 'backend.reports.payout-report',
             'active' => ['app/payout-report'],
             'permission' => ['payout_report'],
-            'order' => 20,
+            'order' => 21,
         ],
         [
             'start_icon' => 'fa-solid fa-clipboard-user',
@@ -215,13 +223,13 @@ return [
             'route' => 'backend.reports.staff-report',
             'active' => ['app/staff-report'],
             'permission' => ['employee_report'],
-            'order' => 21,
+            'order' => 22,
         ],
         [
             'title' => 'sidebar.system',
             'menu_item_type' => 'static',
             'permission' => ['setting_general', 'setting_misc', 'setting_quick_booking', 'setting_custom_code', 'setting_customization', 'setting_mail', 'setting_notification', 'setting_intigrations', 'setting_custom_fields', 'setting_currency', 'setting_commission', 'setting_holiday', 'setting_bussiness_hours', 'setting_payment_method', 'setting_language', 'setting_menu_builder', 'view_page', 'view_app_banner', 'view_role_permissions'],
-            'order' => 22,
+            'order' => 23,
         ],
         [
             'start_icon' => 'fa-solid fa-gear',
@@ -229,7 +237,7 @@ return [
             'route' => 'backend.settings',
             'active' => 'app/settings',
             'permission' => ['system_settings'],
-            'order' => 23,
+            'order' => 24,
         ],
         [
             'start_icon' => 'fa-solid fa-file',
@@ -237,13 +245,13 @@ return [
             'route' => 'backend.pages.index',
             'active' => ['app/pages'],
             'permission' => ['view_page'],
-            'order' => 24,
+            'order' => 25,
         ],
         [
             'start_icon' => 'fa-solid fa-bell',
             'title' => 'sidebar.notifications',
             'nickname' => 'notifications',
-            'order' => 25,
+            'order' => 26,
             'permission' => ['view_notification_list', 'view_notification_template'],
             'menu_item_type' => 'parent',
             'children' => [
@@ -271,7 +279,7 @@ return [
             'route' => 'backend.app-banners.index',
             'active' => 'app/app-banners',
             'permission' => ['view_app_banner'],
-            'order' => 26,
+            'order' => 27,
         ],
         [
             'start_icon' => 'fa-solid fa-user-shield',
@@ -279,7 +287,7 @@ return [
             'route' => 'backend.permission-role.list',
             'active' => ['app/permission-role'],
             'permission' => ['view_role_permissions'],
-            'order' => 27,
+            'order' => 28,
         ],
 
         // [
@@ -493,7 +501,7 @@ return [
             'title' => 'sidebar.finance',
             'menu_item_type' => 'parent',
             'order' => 3,
-            'permission' => ['view_tax', 'view_earning'],
+            'permission' => ['view_tax', 'view_earning', 'view_billing'],
             'children' => [
                 [
                     'menu_type' => 'horizontal',
@@ -507,11 +515,21 @@ return [
                 ],
                 [
                     'menu_type' => 'horizontal',
+                    'start_icon' => 'fa-solid fa-file-invoice',
+                    'title' => 'sidebar.billing',
+                    'route' => 'backend.billing.index',
+                    'active' => ['app/billing'],
+                    'permission' => ['view_billing'],
+                    'order' => 1,
+                    'menu_level' => 1,
+                ],
+                [
+                    'menu_type' => 'horizontal',
                     'start_icon' => 'fa-solid fa-money-bill-1-wave',
                     'title' => 'sidebar.staff_earnings',
                     'route' => 'backend.earnings.index',
                     'active' => ['app/earnings'],
-                    'order' => 1,
+                    'order' => 2,
                     'menu_level' => 1,
                 ],
                 [
@@ -520,7 +538,7 @@ return [
                     'route' => 'backend.promotions.index',
                     'active' => ['app/promotions'],
                     'permission' => ['view_role_permissions'],
-                    'order' => 2,
+                    'order' => 3,
                     'menu_level' => 1,
                 ],
             ],
@@ -699,6 +717,10 @@ return [
         [
             'route' => 'backend.tax.index',
             'title' => 'Tax',
+        ],
+        [
+            'route' => 'backend.billing.index',
+            'title' => 'Billing',
         ],
         [
             'route' => 'backend.earnings.index',

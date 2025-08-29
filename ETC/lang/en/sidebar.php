@@ -17,6 +17,7 @@ return [
     'reviews' => 'Reviews',
     'finance' => 'Finance',
     'tax' => 'Tax',
+    'billing' => 'Billing',
     'staff_earnings' => 'Staff Earnings',
     'reports' => 'Reports',
     'daily_bookings' => 'Daily Bookings',

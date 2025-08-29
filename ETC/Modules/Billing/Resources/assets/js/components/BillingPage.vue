@@ -1,115 +1,139 @@
 <template>
-  <div class="billing card p-5">
-    <div class="row g-3 align-items-center mb-3">
-      <div class="col-md-3">
+  <div class="billing card border-0 shadow-sm">
+    <div class="billing-header border-bottom px-4 py-3 d-flex align-items-center gap-3">
+      <div class="d-flex align-items-center gap-2">
+        <div class="header-icon rounded-circle d-inline-flex align-items-center justify-content-center"><i class="fas fa-file-invoice"></i></div>
         <div>
-          <small class="text-muted">Bill Number:</small>
-          <a href="#" class="fw-semibold"> SBS01-17</a>
+          <div class="text-muted small">Bill Number</div>
+          <a href="#" class="fw-semibold text-decoration-none">SBS01-17</a>
         </div>
       </div>
-      <div class="col-md-3 ms-auto text-end">
-        <small class="text-muted">Sales Date:</small>
-        <span>{{ salesDate }}</span>
+      <div class="vr d-none d-md-block"></div>
+      <div class="ms-auto text-end">
+        <div class="text-muted small">Sales Date</div>
+        <span class="fw-medium">{{ salesDate }}</span>
       </div>
     </div>
 
-    <div class="row g-3 mb-3">
-      <div class="col-md-4">
-        <label class="form-label">Full Name</label>
-        <input class="form-control" v-model="customerName" />
-      </div>
-      <div class="col-md-4">
-        <label class="form-label">Contact Number</label>
-        <div class="input-group">
-          <span class="input-group-text">+971</span>
-          <input class="form-control" v-model="contact" />
-        </div>
-      </div>
-      <div class="col-md-4">
-        <label class="form-label">Membership</label>
-        <Multiselect v-model="membership" :options="['Regular', 'VIP']" />
-      </div>
-    </div>
-
-    <div class="d-flex gap-2 mb-2">
-      <button class="btn btn-primary" @click="open('service')">Services</button>
-      <button class="btn btn-primary" @click="open('product')">Products</button>
-      <button class="btn btn-primary" @click="open('package')">Packages</button>
-      <button class="btn btn-primary" @click="open('promotion')">Promotions</button>
-    </div>
-
-    <div class="table-responsive mb-3">
-      <table class="table table-bordered align-middle">
-        <thead>
-          <tr>
-            <th>Description</th>
-            <th>Staff</th>
-            <th class="text-end">Qty</th>
-            <th class="text-end">Disc(%)</th>
-            <th class="text-end">Disc(AED)</th>
-            <th class="text-end">Price</th>
-            <th class="text-end">Tip</th>
-            <th class="text-end">Total</th>
-            <th class="text-end">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(row, i) in items" :key="i">
-            <td>{{ row.description }}</td>
-            <td>
-              <div class="d-flex flex-column gap-2">
-                <!-- Staff list -->
-                <div v-if="row.staffMembers && row.staffMembers.length > 0" class="d-flex flex-column gap-1">
-                  <div v-for="(staff, staffIndex) in row.staffMembers" :key="staffIndex" class="d-flex align-items-center gap-2">
-                    <span class="badge bg-primary">{{ staff.name }}</span>
-                    <button class="btn btn-sm btn-outline-danger" @click="removeStaffFromItem(i, staffIndex)">
-                      <i class="fas fa-times"></i>
-                    </button>
-                  </div>
-                </div>
-                <!-- Add staff button -->
-                <button class="btn btn-sm btn-outline-primary" @click="selectStaffForItem(i)"><i class="fas fa-plus"></i> Add Staff</button>
+    <div class="p-4 pb-0">
+      <div class="card info-card border-0 shadow-none">
+        <div class="card-body p-3">
+          <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+              <label class="form-label">Full Name</label>
+              <div class="input-group input-group-lg">
+                <span class="input-group-text bg-transparent border-end-0"><i class="fas fa-user"></i></span>
+                <input class="form-control border-start-0" v-model="customerName" placeholder="Enter customer name" />
               </div>
-            </td>
-            <td class="text-end">{{ row.qty }}</td>
-            <td class="text-end">{{ row.discountPercent }}</td>
-            <td class="text-end">{{ row.discountAmount.toFixed(2) }}</td>
-            <td class="text-end">{{ row.price.toFixed(2) }}</td>
-            <td class="text-end">{{ row.tip.toFixed(2) }}</td>
-            <td class="text-end">{{ row.total.toFixed(2) }}</td>
-            <td class="text-end">
-              <button class="btn btn-sm btn-danger" @click="removeItem(i)">Remove</button>
-            </td>
-          </tr>
-          <tr v-if="items.length === 0">
-            <td colspan="9" class="text-center text-muted">No items</td>
-          </tr>
-        </tbody>
-      </table>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Contact Number</label>
+              <div class="input-group input-group-lg">
+                <span class="input-group-text">+971</span>
+                <input class="form-control" v-model="contact" placeholder="5x xxx xxxx" />
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Membership</label>
+              <Multiselect v-model="membership" :options="['Regular', 'VIP']" />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="row g-3">
-      <div class="col-md-8">
-        <label class="form-label">Note</label>
-        <textarea class="form-control" rows="6" v-model="note"></textarea>
+    <div class="row g-4 px-4 pb-4 align-items-start">
+      <div class="col-lg-8">
+        <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
+          <div class="toolbar d-flex flex-wrap gap-2">
+            <button class="btn btn-pill btn-primary" @click="open('service')"><i class="fas fa-concierge-bell me-2"></i>Services</button>
+            <button class="btn btn-pill btn-outline-primary" @click="open('product')"><i class="fas fa-box-open me-2"></i>Products</button>
+            <button class="btn btn-pill btn-outline-primary" @click="open('package')"><i class="fas fa-gift me-2"></i>Packages</button>
+            <button class="btn btn-pill btn-outline-primary" @click="open('promotion')"><i class="fas fa-tags me-2"></i>Promotions</button>
+          </div>
+        </div>
+        <div class="table-responsive table-container card border-0 shadow-sm">
+          <table class="table table-modern table-striped table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Staff</th>
+                <th class="text-end">Qty</th>
+                <th class="text-end">Disc(%)</th>
+                <th class="text-end">Disc(AED)</th>
+                <th class="text-end">Price</th>
+                <th class="text-end">Tip</th>
+                <th class="text-end">Total</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(row, i) in items" :key="i" @click="selectedItemIndex = i" :class="{ 'row-selected': selectedItemIndex === i }">
+                <td>{{ row.description }}</td>
+                <td>
+                  <div class="d-flex flex-column gap-2">
+                    <div v-if="row.staffMembers && row.staffMembers.length > 0" class="d-flex flex-column gap-1">
+                      <div v-for="(staff, staffIndex) in row.staffMembers" :key="staffIndex" class="d-flex align-items-center gap-2">
+                        <span class="badge badge-staff">{{ staff.name }}</span>
+                        <button class="btn btn-sm btn-outline-danger" @click="removeStaffFromItem(i, staffIndex)"><i class="fas fa-times"></i></button>
+                      </div>
+                    </div>
+                    <button class="btn btn-sm btn-light border" @click="selectStaffForItem(i)"><i class="fas fa-user-plus me-1"></i>Add Staff</button>
+                  </div>
+                </td>
+                <td class="text-end">{{ row.qty }}</td>
+                <td class="text-end">{{ row.discountPercent }}</td>
+                <td class="text-end">{{ row.discountAmount.toFixed(2) }}</td>
+                <td class="text-end">{{ row.price.toFixed(2) }}</td>
+                <td class="text-end">
+                  <div class="input-group input-group-sm">
+                    <input type="number" class="form-control" v-model="row.tip" />
+                    <span class="input-group-text">AED</span>
+                  </div>
+                </td>
+                <td class="text-end">{{ row.total.toFixed(2) }}</td>
+                <td class="text-end">
+                  <button class="btn btn-sm btn-outline-danger" @click="removeItem(i)"><i class="fas fa-trash-alt me-1"></i>Remove</button>
+                </td>
+              </tr>
+              <tr v-if="items.length === 0">
+                <td colspan="9" class="text-center text-muted">No items</td>
+              </tr>
+            </tbody>
+            <tfoot v-if="items.length > 0">
+              <tr>
+                <td colspan="7"></td>
+                <td class="text-end fw-semibold">Subtotal</td>
+                <td class="text-end fw-semibold">AED {{ subtotal.toFixed(2) }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <div class="mt-3">
+          <label class="form-label">Note</label>
+          <textarea class="form-control" rows="5" v-model="note" placeholder="Add a note for this bill..."></textarea>
+        </div>
       </div>
-      <div class="col-md-4">
-        <div class="card">
+      <div class="col-lg-4">
+        <div class="card shadow-sm rounded-3 sticky-summary">
           <div class="card-body">
-            <h6 class="mb-3">Payment Details</h6>
-            <div class="d-flex justify-content-between mb-2">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="mb-0">Your order</h6>
+              <span class="badge bg-light text-dark border">{{ items.length }} items</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2 small">
               <span class="text-muted">Subtotal</span>
               <span>AED {{ subtotal.toFixed(2) }}</span>
             </div>
-            <div class="d-flex justify-content-between mb-2">
+            <div class="d-flex justify-content-between mb-2 small">
               <span class="text-muted">Tip</span>
               <span>AED {{ tip.toFixed(2) }}</span>
             </div>
-            <div class="d-flex justify-content-between mb-2">
+            <div class="d-flex justify-content-between mb-2 small">
               <span class="text-muted">Discount %</span>
               <span>{{ discountPercent }}%</span>
             </div>
-            <div class="d-flex justify-content-between mb-2">
+            <div class="d-flex justify-content-between mb-2 small">
               <span class="text-muted">VAT</span>
               <span>AED {{ vat.toFixed(2) }}</span>
             </div>
@@ -119,71 +143,21 @@
               <span class="text-danger">AED {{ grandTotal.toFixed(2) }}</span>
             </div>
             <div class="d-grid mt-3">
-              <button class="btn btn-primary" @click="addPayment">Add Payment</button>
+              <button class="btn btn-success btn-lg" @click="addPayment"><i class="fas fa-credit-card me-2"></i>Add Payment</button>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Services Modal -->
-    <div class="modal fade" id="services-modal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-xl modal-dialog-scrollable">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Select Services</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <div class="table-responsive">
-              <table id="services-datatable" class="table table-bordered align-middle">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th class="text-end">Price</th>
-                    <th width="1%">Action</th>
-                  </tr>
-                </thead>
-              </table>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- /Services Modal -->
+    <!-- Modal Components -->
+    <ServicesModal ref="servicesModalRef" :onServiceSelect="addServiceToBill" />
 
-    <!-- Products Modal -->
-    <div class="modal fade" id="products-modal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-xl modal-dialog-scrollable">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Select Products</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <div class="table-responsive">
-              <table id="products-datatable" class="table table-bordered align-middle">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th class="text-end">Price</th>
-                    <th class="text-end">Stock</th>
-                    <th width="1%">Action</th>
-                  </tr>
-                </thead>
-              </table>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- /Products Modal -->
+    <ProductsModal ref="productsModalRef" :onProductSelect="addProductToBill" />
+
+    <StaffSelectionModal ref="staffModalRef" :itemDescription="selectedItemDescription" :currentStaff="selectedItemStaff" :onStaffAdd="addStaffToItem" :onStaffRemove="removeStaffFromSelectedItem" />
+
+    <PackagesModal ref="packagesModalRef" :onPackageSelect="addPackageToBill" />
   </div>
 </template>
 
@@ -191,9 +165,10 @@
 import { ref, computed, onMounted } from 'vue'
 import Multiselect from '@vueform/multiselect'
 import '@vueform/multiselect/themes/default.css'
-import { useRequest } from '@/helpers/hooks/useCrudOpration'
-
-const { listingRequest } = useRequest()
+import ServicesModal from './ServicesModal.vue'
+import ProductsModal from './ProductsModal.vue'
+import StaffSelectionModal from './StaffSelectionModal.vue'
+import PackagesModal from './PackagesModal.vue'
 
 const salesDate = new Date().toLocaleDateString('en-GB')
 const customerName = ref('Cash')
@@ -205,216 +180,114 @@ const tip = ref(0)
 const discountPercent = ref(0)
 const vatRate = ref(0)
 
-let servicesModal = null
-let servicesDataTable = null
-let productsModal = null
-let productsDataTable = null
+// Modal refs
+const servicesModalRef = ref(null)
+const productsModalRef = ref(null)
+const staffModalRef = ref(null)
+const packagesModalRef = ref(null)
+
+// Staff selection state
+const selectedItemIndex = ref(-1)
+const selectedItemDescription = ref('')
+const selectedItemStaff = ref([])
 
 const subtotal = computed(() => items.value.reduce((s, i) => s + i.total, 0))
 const discountAmount = computed(() => (subtotal.value * discountPercent.value) / 100)
 const vat = computed(() => ((subtotal.value - discountAmount.value) * vatRate.value) / 100)
 const grandTotal = computed(() => subtotal.value + tip.value - discountAmount.value + vat.value)
 
-function initServicesDataTable() {
-  if (servicesDataTable) {
-    servicesDataTable.destroy()
-  }
-
-  servicesDataTable = $('#services-datatable').DataTable({
-    serverSide: false,
-    ajax: {
-      url: '/app/services/index_list',
-      type: 'GET',
-      data: function (d) {
-        return {
-          q: d.search ? d.search.value : ''
-        }
-      },
-      dataSrc: function (json) {
-        // Normalize the response data
-        const raw = (json?.data && Array.isArray(json.data.data) && json.data.data) || (Array.isArray(json?.data) && json.data) || (Array.isArray(json?.list) && json.list) || (Array.isArray(json?.options) && json.options) || (Array.isArray(json) && json) || []
-
-        return raw.map((item) => ({
-          id: item.id ?? item.value ?? null,
-          name: item.name ?? item.label ?? '',
-          price: Number(item.default_price ?? item.price ?? item.min_price ?? 0)
-        }))
-      }
-    },
-    columns: [
-      { data: 'name', name: 'name' },
-      {
-        data: 'price',
-        name: 'price',
-        className: 'text-end',
-        render: function (data) {
-          return parseFloat(data || 0).toFixed(2)
-        }
-      },
-      {
-        data: null,
-        orderable: false,
-        searchable: false,
-        className: 'text-center',
-        render: function (data, type, row) {
-          return `<button class="btn btn-sm btn-primary add-service-btn" data-service='${JSON.stringify(row)}'>Add</button>`
-        }
-      }
-    ],
-    order: [[0, 'asc']],
-    pageLength: 10,
-    language: {
-      search: 'Search services:',
-      lengthMenu: 'Show _MENU_ services per page',
-      info: 'Showing _START_ to _END_ of _TOTAL_ services',
-      emptyTable: 'No services found'
-    }
-  })
-
-  // Handle add service button clicks
-  $('#services-datatable').on('click', '.add-service-btn', function () {
-    const serviceData = $(this).data('service')
-    addServiceToBill(serviceData)
-    // Don't close services modal here - it will be closed after staff selection
-  })
-}
-
-function addServiceToBill(srv) {
+function addServiceToBill(service) {
   // Add service without staff - user will select staff later
   items.value.push({
-    id: srv.id,
-    description: srv.name,
+    id: service.id,
+    description: service.name,
     staffMembers: [], // Array to hold multiple staff members
     qty: 1,
     discountPercent: 0,
     discountAmount: 0,
-    price: Number(srv.price || 0),
+    price: Number(service.price || 0),
     tip: 0,
-    total: Number(srv.price || 0)
+    total: Number(service.price || 0)
   })
+}
 
-  // Close services modal
-  servicesModal.hide()
+function addProductToBill(product) {
+  items.value.push({
+    id: product.id,
+    description: product.name,
+    staffMembers: [],
+    qty: 1,
+    discountPercent: 0,
+    discountAmount: 0,
+    price: Number(product.price || 0),
+    tip: 0,
+    total: Number(product.price || 0)
+  })
+}
+
+async function addPackageToBill(pkg) {
+  // Use services that already come with the package from index_list
+  if (Array.isArray(pkg?.services) && pkg.services.length > 0) {
+    const mapped = pkg.services.map((item) => ({
+      id: item.id ?? item.service_id ?? item.value ?? null,
+      name: item.name ?? item.service_name ?? item.label ?? '',
+      price: Number(item.service_price ?? item.discount_price ?? item.default_price ?? item.price ?? item.min_price ?? 0)
+    }))
+    if (mapped.length > 0) {
+      mapped.forEach((service) => addServiceToBill(service))
+      return
+    }
+  }
+
+  // Fallback: add the package itself as a single line item
+  items.value.push({
+    id: pkg.id,
+    description: pkg.name,
+    staffMembers: [],
+    qty: 1,
+    discountPercent: 0,
+    discountAmount: 0,
+    price: Number(pkg.price || 0),
+    tip: 0,
+    total: Number(pkg.price || 0)
+  })
 }
 
 function selectStaffForItem(itemIndex) {
-  // Show staff selection modal for specific item
-  showStaffSelectionModalForItem(itemIndex)
-}
-
-function showStaffSelectionModalForItem(itemIndex) {
   const item = items.value[itemIndex]
+  selectedItemIndex.value = itemIndex
+  selectedItemDescription.value = item.description
+  selectedItemStaff.value = [...(item.staffMembers || [])]
 
-  // Create a temporary modal for staff selection
-  const modalHtml = `
-    <div class="modal fade" id="staff-selection-modal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Select Staff for "${item.description}"</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <div class="mb-3">
-              <label class="form-label">Current Staff</label>
-              <div id="current-staff-list" class="mb-2">
-                <!-- Current staff will be displayed here -->
-              </div>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Add New Staff Member</label>
-              <select id="staff-select" class="form-control">
-                <option value="">Choose staff...</option>
-              </select>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary" id="confirm-staff-btn">Add Staff</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `
-
-  // Remove existing modal if any
-  const existingModal = document.getElementById('staff-selection-modal')
-  if (existingModal) {
-    existingModal.remove()
+  if (staffModalRef.value) {
+    staffModalRef.value.show()
   }
-
-  // Add modal to body
-  document.body.insertAdjacentHTML('beforeend', modalHtml)
-
-  // Initialize modal
-  const staffModal = new window.bootstrap.Modal(document.getElementById('staff-selection-modal'))
-
-  // Load staff data
-  loadStaffData().then((staffList) => {
-    const staffSelect = document.getElementById('staff-select')
-    const currentStaffList = document.getElementById('current-staff-list')
-
-    // Display current staff
-    if (item.staffMembers && item.staffMembers.length > 0) {
-      currentStaffList.innerHTML = item.staffMembers.map((staff) => `<span class="badge bg-primary me-2">${staff.name}</span>`).join('')
-    } else {
-      currentStaffList.innerHTML = '<span class="text-muted">No staff assigned yet</span>'
-    }
-
-    // Populate dropdown with available staff (excluding already assigned)
-    const assignedStaffIds = item.staffMembers ? item.staffMembers.map((s) => s.id) : []
-    const availableStaff = staffList.filter((staff) => !assignedStaffIds.includes(staff.id))
-
-    availableStaff.forEach((staff) => {
-      const option = document.createElement('option')
-      option.value = staff.id
-      option.textContent = staff.name
-      staffSelect.appendChild(option)
-    })
-  })
-
-  // Handle confirm button
-  document.getElementById('confirm-staff-btn').addEventListener('click', function () {
-    const selectedStaffId = document.getElementById('staff-select').value
-    const selectedStaffName = document.getElementById('staff-select').options[document.getElementById('staff-select').selectedIndex].text
-
-    if (selectedStaffId) {
-      // Add staff to the array
-      if (!items.value[itemIndex].staffMembers) {
-        items.value[itemIndex].staffMembers = []
-      }
-
-      items.value[itemIndex].staffMembers.push({
-        id: selectedStaffId,
-        name: selectedStaffName
-      })
-
-      // Close modal
-      staffModal.hide()
-    } else {
-      alert('Please select a staff member')
-    }
-  })
-
-  // Show the modal
-  staffModal.show()
 }
 
-async function loadStaffData() {
-  try {
-    const response = await fetch('/app/employees/index_data')
-    const data = await response.json()
+function addStaffToItem(staff) {
+  if (selectedItemIndex.value >= 0) {
+    if (!items.value[selectedItemIndex.value].staffMembers) {
+      items.value[selectedItemIndex.value].staffMembers = []
+    }
 
-    // Normalize the response data - employees index_data returns different structure
-    const raw = (data?.data && Array.isArray(data.data.data) && data.data.data) || (Array.isArray(data?.data) && data.data) || (Array.isArray(data?.list) && data.list) || (Array.isArray(data?.options) && data.options) || (Array.isArray(data) && data) || []
+    // Check if staff is already assigned to this service
+    const isAlreadyAssigned = items.value[selectedItemIndex.value].staffMembers.some((existingStaff) => existingStaff.id === staff.id)
 
-    return raw.map((item) => ({
-      id: item.id ?? item.value ?? null,
-      name: item.name ?? item.label ?? (item.first_name && item.last_name ? item.first_name + ' ' + item.last_name : '') ?? ''
-    }))
-  } catch (error) {
-    console.error('Error loading staff data:', error)
-    return []
+    if (isAlreadyAssigned) {
+      // Show alert for duplicate staff assignment
+      alert(`Staff member "${staff.name}" is already assigned to this service.`)
+      return
+    }
+
+    items.value[selectedItemIndex.value].staffMembers.push(staff)
+    selectedItemStaff.value = [...items.value[selectedItemIndex.value].staffMembers]
+  }
+}
+
+function removeStaffFromSelectedItem(index) {
+  if (selectedItemIndex.value >= 0) {
+    items.value[selectedItemIndex.value].staffMembers.splice(index, 1)
+    selectedItemStaff.value = [...items.value[selectedItemIndex.value].staffMembers]
   }
 }
 
@@ -426,105 +299,16 @@ function removeStaffFromItem(itemIndex, staffIndex) {
   items.value[itemIndex].staffMembers.splice(staffIndex, 1)
 }
 
-function initProductsDataTable() {
-  if (productsDataTable) {
-    productsDataTable.destroy()
-  }
-
-  productsDataTable = $('#products-datatable').DataTable({
-    serverSide: false,
-    ajax: {
-      url: '/app/products/products_list',
-      type: 'GET',
-      data: function (d) {
-        return {
-          q: d.search ? d.search.value : ''
-        }
-      },
-      dataSrc: function (json) {
-        // Expect index_data returns datatable format {data: [...]} or array
-        const arr = (Array.isArray(json?.data) && json.data) || (Array.isArray(json) && json) || []
-        return arr.map((p) => ({
-          id: p.id ?? p.product_id ?? p.value ?? null,
-          name: p.name ?? '',
-          price: Number(p.min_price ?? p.price ?? p.default_price ?? 0),
-          stock: Number(p.stock_qty ?? p.qty ?? 0)
-        }))
-      }
-    },
-    columns: [
-      { data: 'name', name: 'name' },
-      {
-        data: 'price',
-        name: 'price',
-        className: 'text-end',
-        render: function (data) {
-          return parseFloat(data || 0).toFixed(2)
-        }
-      },
-      { data: 'stock', name: 'stock', className: 'text-end' },
-      {
-        data: null,
-        orderable: false,
-        searchable: false,
-        className: 'text-center',
-        render: function (data, type, row) {
-          return `<button class="btn btn-sm btn-primary add-product-btn" data-product='${JSON.stringify(row)}'>Add</button>`
-        }
-      }
-    ],
-    order: [[0, 'asc']],
-    pageLength: 10,
-    language: {
-      search: 'Search products:',
-      emptyTable: 'No products found'
-    }
-  })
-
-  // Handle add product button
-  $('#products-datatable').on('click', '.add-product-btn', function () {
-    const productData = $(this).data('product')
-    addProductToBill(productData)
-  })
-}
-
-function addProductToBill(prod) {
-  items.value.push({
-    id: prod.id,
-    description: prod.name,
-    staffMembers: [],
-    qty: 1,
-    discountPercent: 0,
-    discountAmount: 0,
-    price: Number(prod.price || 0),
-    tip: 0,
-    total: Number(prod.price || 0)
-  })
-  if (productsModal) productsModal.hide()
-}
-
-onMounted(() => {
-  const servicesEl = document.getElementById('services-modal')
-  if (servicesEl && window.bootstrap) {
-    servicesModal = new window.bootstrap.Modal(servicesEl)
-    servicesEl.addEventListener('shown.bs.modal', function () {
-      if (!servicesDataTable) initServicesDataTable()
-      else servicesDataTable.ajax.reload()
-    })
-  }
-  const productsEl = document.getElementById('products-modal')
-  if (productsEl && window.bootstrap) {
-    productsModal = new window.bootstrap.Modal(productsEl)
-    productsEl.addEventListener('shown.bs.modal', function () {
-      if (!productsDataTable) initProductsDataTable()
-      else productsDataTable.ajax.reload()
-    })
-  }
-})
-
 function open(type) {
-  if (type === 'service' && servicesModal) servicesModal.show()
-  if (type === 'product' && productsModal) productsModal.show()
+  if (type === 'service' && servicesModalRef.value) {
+    servicesModalRef.value.show()
+  }
+  if (type === 'product' && productsModalRef.value) {
+    productsModalRef.value.show()
+  }
+  if (type === 'package' && packagesModalRef.value) {
+    packagesModalRef.value.show()
+  }
 }
 
 function addPayment() {}
@@ -534,5 +318,63 @@ function addPayment() {}
 .billing .table th,
 .billing .table td {
   vertical-align: middle;
+}
+
+.billing-header {
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+.header-icon {
+  width: 40px;
+  height: 40px;
+  background: #0d6efd10;
+  color: #0d6efd;
+}
+
+.toolbar .btn {
+  min-width: 140px;
+}
+
+.btn-pill {
+  border-radius: 999px;
+}
+
+.table-container thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #f8f9fa;
+}
+
+.table-modern thead th {
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.badge-staff {
+  background-color: #eef2ff;
+  color: #1d4ed8;
+  border: 1px solid #dbeafe;
+}
+
+.sticky-summary {
+  position: sticky;
+  top: 16px;
+}
+
+/* Light theme refinements */
+.table-modern thead th {
+  background: #f8f9fa;
+}
+
+.table-container.card {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.row-selected {
+  outline: 2px solid #0d6efd;
+  outline-offset: -2px;
+  background-color: #0d6efd0a;
 }
 </style>
